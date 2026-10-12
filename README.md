@@ -1,4 +1,4 @@
-# Enterprise Retail & POS Platform — Architecture Case Study
+# Enterprise Retail & POS Platform Architecture Case Study
 
 > A sanitized portfolio case study of a private, multi-tenant retail and point-of-sale platform. The private application source code is intentionally not included.
 
@@ -98,15 +98,12 @@ retail-pos-architecture-showcase/
 
 ## My contribution
 
-Customize this section to reflect your actual work and ownership before publishing.
-
 - Backend architecture and domain/service organization in TypeScript and AdonisJS.
 - Service orchestration across cart, pricing, inventory, orders, payments, and commissions.
 - Permission policies and scope-aware data access.
 - PostgreSQL constraints, transactions, triggers, and audit logging.
 - Integration patterns for payment providers, background jobs, and object storage.
 
-Only list responsibilities you personally performed. If a feature was planned or prototyped rather than shipped, say so explicitly.
 
 ## Technology choices
 
@@ -122,16 +119,9 @@ Only list responsibilities you personally performed. If a feature was planned or
 | File handling | Object storage, where configured | Documents and assets |
 | Payments | Tokenized/hosted payment flow | Reduce direct handling of card details |
 
-Remove any technology or deployment claim that you cannot substantiate. In particular, application-level query scoping is not automatically equivalent to PostgreSQL-native Row-Level Security (RLS), and payment tokenization alone does not establish PCI-DSS compliance.
 
 ## Contact
 
 **M Nawaz Khan — Full Stack Developer**
-
-- Portfolio: [mnawaz.me](https://mnawaz.me)
 - GitHub: [Nawaz393](https://github.com/Nawaz393)
-- LinkedIn: [Muhammad Nawaz Khan](https://www.linkedin.com/in/muhammad-nawaz-khan-69048724b/)
-
----
-
-*Prepared as a sanitized portfolio template. Review every project-specific statement and obtain client/employer approval before publishing.*
+- LinkedIn: [Muhammad Nawaz Khan](https://www.linkedin.com/in/nawaz393)
