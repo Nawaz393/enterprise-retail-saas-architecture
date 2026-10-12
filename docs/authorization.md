@@ -49,4 +49,3 @@ Test at least the following cases with synthetic identities and records:
 - Permission-cache invalidation does not preserve revoked access.
 - Object-storage access checks match the application authorization model.
 
-Do not include real tenant identifiers, tokens, private URLs, or production data in public examples.
