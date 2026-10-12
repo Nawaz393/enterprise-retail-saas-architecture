@@ -22,8 +22,19 @@ The platform is represented as a domain-oriented modular monolith. HTTP transpor
 | Object storage | Stores generated documents and application assets |
 
 ## Context diagram
-
-See [`../diagrams/system-context.mmd`](../diagrams/system-context.mmd).
+```mermaid
+flowchart LR
+    U[Merchant / Staff Users] --> WEB[Web Client]
+    WEB --> API[API and Authentication]
+    API --> AUTH[Authorization Policies]
+    AUTH --> DOM[Domain Services]
+    DOM --> DB[(PostgreSQL)]
+    DOM --> PAY[Payment Provider]
+    DOM --> Q[(Background Queue)]
+    Q --> WORK[Worker Process]
+    WORK --> OBJ[(Object Storage)]
+    WORK --> N[Email / Document Delivery]
+```
 
 ## Why a modular monolith?
 
@@ -31,8 +42,47 @@ A modular monolith can keep deployment and transaction coordination simpler than
 
 ## Request flow
 
-See [`../diagrams/domain-modules.mmd`](../diagrams/domain-modules.mmd) for the simplified domain interaction view.
-
+```mermaid
+flowchart TB
+    subgraph Transport["Presentation and Transport"]
+        ROUTES[Routes] --> VALIDATE[Request Validation] --> CTRL[Controllers]
+    end
+    subgraph Domains["Domain Modules"]
+        AUTH[Auth / RBAC]
+        MERCHANT[Merchant / ISO]
+        CATALOG[Product / Category]
+        CART[Cart]
+        PRICE[Pricing / Tax]
+        ORDER[Order / Checkout]
+        PAYMENT[Payment]
+        COMMISSION[Commission]
+        AUDIT[Audit]
+    end
+    subgraph Infrastructure["Infrastructure"]
+        DB[(PostgreSQL)]
+        QUEUE[(Queue)]
+        STORAGE[Object Storage]
+        PROVIDER[Payment Provider]
+    end
+    CTRL --> AUTH
+    CTRL --> ORDER
+    ORDER --> CART
+    ORDER --> PRICE
+    ORDER --> CATALOG
+    ORDER --> PAYMENT
+    ORDER --> COMMISSION
+    AUTH --> DB
+    MERCHANT --> DB
+    CATALOG --> DB
+    CART --> DB
+    PRICE --> DB
+    ORDER --> DB
+    PAYMENT --> PROVIDER
+    COMMISSION --> DB
+    AUDIT --> DB
+    ORDER --> QUEUE
+    QUEUE --> STORAGE
+```
 1. The client submits a request.
 2. The API validates its shape and authenticates the caller.
 3. Authorization checks the requested action and data scope.
@@ -40,6 +90,3 @@ See [`../diagrams/domain-modules.mmd`](../diagrams/domain-modules.mmd) for the s
 5. The database reads or writes are performed, often within a transaction for multi-step changes.
 6. The API returns a structured result.
 
-## Scope note
-
-This is a conceptual case-study diagram, not a verified deployment manifest. Confirm versions, cloud services, network boundaries, and production status before publishing specific operational claims.
