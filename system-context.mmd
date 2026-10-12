@@ -1,0 +1,11 @@
+flowchart LR
+    U[Merchant / Staff Users] --> WEB[Web Client]
+    WEB --> API[API and Authentication]
+    API --> AUTH[Authorization Policies]
+    AUTH --> DOM[Domain Services]
+    DOM --> DB[(PostgreSQL)]
+    DOM --> PAY[Payment Provider]
+    DOM --> Q[(Background Queue)]
+    Q --> WORK[Worker Process]
+    WORK --> OBJ[(Object Storage)]
+    WORK --> N[Email / Document Delivery]

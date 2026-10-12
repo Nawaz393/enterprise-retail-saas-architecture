@@ -1,0 +1,39 @@
+flowchart TB
+    subgraph Transport["Presentation and Transport"]
+        ROUTES[Routes] --> VALIDATE[Request Validation] --> CTRL[Controllers]
+    end
+    subgraph Domains["Domain Modules"]
+        AUTH[Auth / RBAC]
+        MERCHANT[Merchant / ISO]
+        CATALOG[Product / Category]
+        CART[Cart]
+        PRICE[Pricing / Tax]
+        ORDER[Order / Checkout]
+        PAYMENT[Payment]
+        COMMISSION[Commission]
+        AUDIT[Audit]
+    end
+    subgraph Infrastructure["Infrastructure"]
+        DB[(PostgreSQL)]
+        QUEUE[(Queue)]
+        STORAGE[Object Storage]
+        PROVIDER[Payment Provider]
+    end
+    CTRL --> AUTH
+    CTRL --> ORDER
+    ORDER --> CART
+    ORDER --> PRICE
+    ORDER --> CATALOG
+    ORDER --> PAYMENT
+    ORDER --> COMMISSION
+    AUTH --> DB
+    MERCHANT --> DB
+    CATALOG --> DB
+    CART --> DB
+    PRICE --> DB
+    ORDER --> DB
+    PAYMENT --> PROVIDER
+    COMMISSION --> DB
+    AUDIT --> DB
+    ORDER --> QUEUE
+    QUEUE --> STORAGE

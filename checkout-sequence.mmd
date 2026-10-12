@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    actor Customer
+    participant API as Checkout API
+    participant DB as PostgreSQL Transaction
+    participant Pay as Payment Provider
+    Customer->>API: Submit checkout
+    API->>DB: Begin transaction
+    API->>DB: Validate and lock stock rows
+    DB-->>API: Locked inventory state
+    API->>API: Calculate totals
+    API->>DB: Write order and line items
+    API->>Pay: Initiate payment
+    alt Payment succeeds
+        Pay-->>API: Provider result
+        API->>DB: Record payment state
+        API->>DB: Commit transaction
+        API-->>Customer: Confirmation
+    else Payment fails before commit
+        Pay-->>API: Failure result
+        API->>DB: Roll back local changes
+        API-->>Customer: Failure response
+    end

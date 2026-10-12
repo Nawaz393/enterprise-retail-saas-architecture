@@ -1,0 +1,11 @@
+flowchart TD
+    REQUEST[Authenticated Request] --> PERMS[Resolve Permissions]
+    PERMS --> SCOPE{Valid permitted scope?}
+    SCOPE -->|Global| GLOBAL[Apply global permission]
+    SCOPE -->|Organization / ISO| ORG[Filter by organization]
+    SCOPE -->|Self| SELF[Filter by current user]
+    SCOPE -->|Missing / invalid| FAIL[Fail closed]
+    GLOBAL --> QUERY[Execute scoped query]
+    ORG --> QUERY
+    SELF --> QUERY
+    FAIL --> EMPTY[Return no records or deny]

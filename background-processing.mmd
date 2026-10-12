@@ -1,0 +1,8 @@
+flowchart LR
+    API[API Service] --> ENQUEUE[Enqueue job]
+    ENQUEUE --> QUEUE[(Queue)]
+    QUEUE --> WORKER[Worker]
+    WORKER --> PROCESS[Generate / process file]
+    PROCESS --> STORE[(Object storage)]
+    WORKER --> EMAIL[Send notification]
+    WORKER --> STATUS[Record outcome]

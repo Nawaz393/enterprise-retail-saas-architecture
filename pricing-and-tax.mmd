@@ -1,0 +1,10 @@
+flowchart TD
+    ITEMS[Cart items and prices] --> SUB[Calculate subtotal]
+    SUB --> DISCOUNT[Allocate discounts]
+    DISCOUNT --> TAXBASE[Determine taxable amount]
+    TAXBASE --> TAX[Apply relevant tax rules]
+    TAX --> ROUND[Apply currency rounding policy]
+    ROUND --> RECONCILE{Totals reconcile?}
+    RECONCILE -->|No| ADJUST[Apply documented remainder rule]
+    RECONCILE -->|Yes| SAVE[Persist totals and line snapshots]
+    ADJUST --> SAVE
