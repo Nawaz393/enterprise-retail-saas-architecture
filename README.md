@@ -1,4 +1,4 @@
-# Enterprise Retail & POS Platform — Engineering Case Study
+# Enterprise Retail & POS Platform  Engineering Case Study
 
 A documentation-first case study of a multi-tenant retail/POS platform. This repository showcases architecture and representative implementation patterns rather than mirroring the private application repository.
 
@@ -68,14 +68,12 @@ flowchart TB
 | File storage | S3-compatible object storage |
 | Payments | Tokenized payment-provider flow |
 
-Only describe components as deployed if that reflects the actual environment. Keep personal contribution claims precise.
 
 ## Contact
 
 **M Nawaz Khan — Full Stack Developer**
 
-- Portfolio: [mnawaz.me](https://mnawaz.me)
 - GitHub: [Nawaz393](https://github.com/Nawaz393)
-- LinkedIn: [Muhammad Nawaz Khan](https://www.linkedin.com/in/muhammad-nawaz-khan-69048724b/)
+- LinkedIn: [Muhammad Nawaz Khan](https://www.linkedin.com/in/nawaz393)
 
 [Documentation index](docs/README.md)
