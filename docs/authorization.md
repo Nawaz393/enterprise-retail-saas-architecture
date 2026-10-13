@@ -1,51 +1,35 @@
 # Authorization and Tenant Scoping
 
-[← Main README](../README.md) · [← Documentation index](README.md)
+[← Main README](../README.md) · [← Documentation index](README.md) · [Code examples](code-examples.md)
 
-## Two authorization questions
+Two checks are needed for protected operations:
 
-Every protected operation should answer:
-
-1. Is the caller permitted to perform this action?
-2. Which records can the caller access?
-
-Action permissions and record scoping are related but distinct. A user may be allowed to view merchants within a specific organization without being allowed to view every merchant in the system.
-
-## Conceptual flow
+1. **Action permission:** may this caller perform the operation?
+2. **Record scope:** which rows may the caller access?
 
 ```mermaid
 flowchart TD
-    REQUEST[Authenticated Request] --> PERMS[Resolve Permissions]
-    PERMS --> SCOPE{Determine permitted scope}
-    SCOPE -->|Global| GLOBAL[Apply global permission]
+    REQUEST[Authenticated Request] --> PERM[Resolve action permissions]
+    PERM --> SCOPE{Resolve record scope}
+    SCOPE -->|Global| ALL[Query within explicit grant]
     SCOPE -->|Organization / ISO| ORG[Filter by organization]
     SCOPE -->|Self| SELF[Filter by current user]
-    SCOPE -->|Missing or invalid| FAIL[Fail closed]
-    GLOBAL --> QUERY[Execute scoped query]
-    ORG --> QUERY
-    SELF --> QUERY
-    FAIL --> EMPTY[Return no records or deny]
+    SCOPE -->|Missing / invalid| FAIL[Fail closed]
+    ALL --> RESULT[Execute scoped query]
+    ORG --> RESULT
+    SELF --> RESULT
+    FAIL --> EMPTY[Return empty result or deny]
 ```
 
-See [`../diagrams/authorization-flow.mmd`](../diagrams/authorization-flow.mmd).
+A missing or invalid scope must not fall back to an unrestricted query. See the [scoping example](code-examples.md#1-fail-closed-query-scoping).
 
-## Fail-closed behavior
+| Scenario | Expected behavior |
+|---|---|
+| Explicit global-view permission | Allow only the operations covered by that permission |
+| Organization scope | Constrain query to the authorized organization |
+| Self scope | Constrain query to the current user |
+| Missing relationship | Fail closed |
+| Bulk operation or export | Apply equivalent permission and scope rules |
+| Background job | Resolve tenant/actor context explicitly |
 
-If a policy cannot establish a valid permitted scope, the operation should not fall back to an unrestricted query. Depending on the operation, the safe outcome may be an empty result or an authorization error.
-
-## Important terminology
-
-Application-level policy-enforced query scoping is **not automatically PostgreSQL-native Row-Level Security (RLS)**. Only claim database RLS if PostgreSQL policies are actually configured and verified.
-
-## Security test matrix
-
-Test at least the following cases with synthetic identities and records:
-
-- A user can access records within their permitted scope.
-- A user cannot read or mutate records outside that scope.
-- Missing organization relationships do not grant broad access.
-- Bulk actions and exports apply the same scope restrictions.
-- Background jobs enforce the correct tenant boundary.
-- Permission-cache invalidation does not preserve revoked access.
-- Object-storage access checks match the application authorization model.
-
+Application-level query scoping is not automatically PostgreSQL-native Row-Level Security (RLS). Claim database RLS only if database policies are configured and verified.

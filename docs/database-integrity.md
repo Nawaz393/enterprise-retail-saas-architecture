@@ -1,40 +1,26 @@
 # Database Integrity and Audit History
 
-[← Main README](../README.md) · [← Documentation index](README.md)
-
-## Why database invariants matter
-
-Application validation provides useful feedback, but important rules should also be enforced by the database when practical. Database constraints protect data when writes originate from multiple code paths, provided those paths use the same constrained database.
+[← Main README](../README.md) · [← Documentation index](README.md) · [Code examples](code-examples.md)
 
 ## Patterns
 
-- **Unique and partial unique indexes:** enforce uniqueness for the relevant subset of rows.
-- **CHECK constraints:** reject rows that violate local data rules.
-- **Foreign keys:** protect relationships between records.
-- **Deferred constraint triggers:** validate certain cross-row invariants at transaction commit.
-- **Audit records:** retain selected before/after values for traceability.
+- Partial unique indexes for conditional uniqueness.
+- `CHECK` constraints for row-level invariants.
+- Foreign keys for referential integrity.
+- Deferred constraint triggers for cross-row rules evaluated at commit.
+- Audit triggers for selected before/after snapshots.
 
-## Conceptual write lifecycle
+See [SQL examples](code-examples.md#4-database-constraints) and the [audit trigger example](code-examples.md#5-audit-trigger-pattern).
 
 ```mermaid
-flowchart TD
-    WRITE[Insert / Update / Delete] --> CONSTRAINTS[Constraints and indexes]
-    CONSTRAINTS --> TRIGGERS[Relevant trigger checks]
-    TRIGGERS --> VALID{Invariants hold?}
-    VALID -->|Yes| COMMIT[Commit change]
+flowchart LR
+    MUTATION[Insert / Update / Delete] --> RULES[Constraints and indexes]
+    RULES --> TRIGGER[Relevant trigger checks]
+    TRIGGER --> VALID{Valid?}
+    VALID -->|Yes| COMMIT[Commit]
     VALID -->|No| ROLLBACK[Reject transaction]
-    WRITE -. selected mutations .-> AUDIT[Audit event]
+    MUTATION -. selected changes .-> AUDIT[Audit event]
     AUDIT --> HISTORY[(Audit history)]
 ```
 
-## Operational considerations
-
-- Test constraints with both valid and invalid data.
-- Ensure deferred checks work for multi-row operations.
-- Plan migrations and rollback behavior carefully.
-- Review trigger performance on bulk writes.
-- Restrict access to audit records and define retention.
-- Avoid logging secrets or unnecessary personal/payment information.
-- Monitor audit-table growth and index overhead.
-
-This public document intentionally avoids reproducing the complete private schema or production migrations.
+Test deferred constraints, migrations, bulk writes, trigger performance, retention, and audit access controls. Audit payloads should not store credentials, payment data, or unnecessary personal information.

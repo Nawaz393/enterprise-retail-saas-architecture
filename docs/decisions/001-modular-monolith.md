@@ -2,8 +2,9 @@
 
 [← ADR index](README.md) · [← Main README](../../README.md)
 
-- **Status:** Proposed portfolio description; confirm against the actual implementation.
-- **Context:** Retail workflows span catalog, cart, pricing, checkout, payment, and commissions. Splitting every domain into an independent service can add operational and distributed-consistency costs.
-- **Decision:** Organize related responsibilities into domain modules within one deployable backend, using explicit service boundaries.
-- **Consequences:** Deployment and local transaction coordination remain comparatively straightforward. Teams must actively prevent circular dependencies and cross-domain data-access shortcuts.
-- **Alternatives considered:** A service-per-domain architecture; a single unstructured application layer.
+- **Status:** Confirm against the actual implementation.
+- **Context:** Retail workflows span catalog, cart, pricing, orders, payments, and commissions.
+- **Decision:** Organize capabilities into domain modules within one backend, using explicit service boundaries.
+- **Benefits:** Straightforward deployment and shared database transactions where appropriate.
+- **Trade-offs:** Boundaries need discipline to prevent circular dependencies and cross-domain shortcuts.
+- **Alternatives:** Independent services per domain; one unstructured service layer.

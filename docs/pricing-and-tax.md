@@ -1,42 +1,40 @@
 # Pricing, Discounts, and Tax
 
-[← Main README](../README.md) · [← Documentation index](README.md)
-
-## Objective
-
-Currency calculations require controlled precision and a clearly specified rounding policy. Binary floating-point arithmetic should not be used as the default representation for financial amounts.
-
-## Calculation flow
+[← Main README](../README.md) · [← Documentation index](README.md) · [Code examples](code-examples.md)
 
 ```mermaid
 flowchart TD
     ITEMS[Cart items and prices] --> SUB[Calculate subtotal]
-    SUB --> DISCOUNT[Allocate discounts]
-    DISCOUNT --> TAXBASE[Determine taxable amount]
-    TAXBASE --> TAX[Apply relevant tax rules]
-    TAX --> ROUND[Apply currency rounding policy]
-    ROUND --> RECONCILE{Totals reconcile?}
-    RECONCILE -->|No| ADJUST[Apply documented remainder rule]
-    RECONCILE -->|Yes| SAVE[Persist totals and line snapshots]
-    ADJUST --> SAVE
+    SUB --> DISC[Allocate discounts]
+    DISC --> BASE[Determine taxable amount]
+    BASE --> TAX[Apply applicable tax rules]
+    TAX --> ROUND[Apply currency rounding]
+    ROUND --> CHECK{Totals reconcile?}
+    CHECK -->|No| DELTA[Apply documented remainder rule]
+    CHECK -->|Yes| SAVE[Persist totals and snapshots]
+    DELTA --> SAVE
 ```
 
-## Design considerations
+## Bundle discount allocation
 
-- Use decimal arithmetic for intermediate values.
-- Specify the rounding mode and when rounding occurs.
-- Define how discounts are allocated across bundle components.
-- Explain how a rounding remainder is assigned.
-- Reconcile line-item totals with the order total.
-- Store a snapshot of the prices, discounts, and tax values used at checkout.
-- Test boundary values, zero/negative inputs where relevant, and refund calculations.
+A proportional allocation can use each component's share of the bundle's list price:
 
-## Rounding is a business rule
+\[
+w_i = \frac{p_i}{\sum_j p_j}
+\]
 
-A decimal library can provide predictable arithmetic, but it cannot decide the correct tax policy or accounting treatment. Those rules must be validated against the relevant business and jurisdiction requirements.
+\[
+d_i = D \times w_i
+\]
 
-## Suggested synthetic example
+Here, \(p_i\) is the component's list-price contribution and \(D\) is the total discount. The implementation must define rounding and how a remaining minor-unit difference is assigned.
 
-Add a small worked example using fabricated prices and a clearly stated rounding policy. Do not use customer orders or proprietary pricing rules unless explicitly approved for disclosure.
+## Review checklist
 
-[View the diagram source](../diagrams/pricing-and-tax.mmd)
+- Define the rounding mode and when rounding occurs.
+- Reconcile item totals against the order total.
+- Store a snapshot of prices, discounts, and taxes used at checkout.
+- Test boundary values, refunds, and partial returns.
+- Validate tax rules against applicable business requirements.
+
+See the [Decimal.js example](code-examples.md#2-decimal-arithmetic). Decimal arithmetic improves numerical control but does not by itself prove accounting or tax compliance.

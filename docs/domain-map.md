@@ -1,50 +1,59 @@
-# Domain Map
+# Domain Map and Service Boundaries
 
 [← Main README](../README.md) · [← Documentation index](README.md)
 
-## Domain responsibilities
-
 | Domain | Responsibility |
 |---|---|
-| Auth / RBAC | Authentication, roles, permissions, and permission lookup |
-| Merchant / ISO | Organizational relationships and scoped access |
-| Product / Category | Catalog data, product variants, categories, and related assets |
+| Auth / RBAC | Authentication, roles, permissions, permission lookup |
+| Merchant / ISO | Organizational hierarchy and access boundaries |
+| Product / Category | Catalog, variants, bundles, categories, assets |
 | Cart | Cart state and selected items |
-| Pricing / Tax | Price calculation, discounts, tax rules, and totals |
-| Order / Checkout | Coordinates checkout and order lifecycle |
-| Payment | Payment-provider integration and payment state |
-| Commission | Commission calculation/recording for applicable workflows |
-| Audit | Records selected changes for traceability |
+| Pricing / Tax | Discounts, tax rules, charge calculation, reconciliation |
+| Order / Checkout | Coordinates stock, pricing, order creation, payment, finalization |
+| Payment | Provider integration and payment state |
+| Commission | Commission calculation and recording |
+| Audit | Selected change history |
+| Storage / Worker | Generated documents, email delivery, queued work |
 
-The table is a high-level public description. Adjust it to match the actual modules and their ownership.
-
-## Interaction pattern
-
-Controllers should remain focused on transport-level concerns. Services own business operations and call other domain services through explicit interfaces or injected dependencies.
+## Dependency direction
 
 ```mermaid
 flowchart TD
-    ROUTE[Route] --> VALIDATE[Validate Input]
-    VALIDATE --> CTRL[Controller]
-    CTRL --> CHECKOUT[Checkout Service]
+    CTRL[Controller] --> CHECKOUT[Checkout Service]
     CHECKOUT --> CART[Cart Service]
     CHECKOUT --> PRICE[Pricing Service]
-    CHECKOUT --> STOCK[Inventory Service]
+    CHECKOUT --> STOCK[Stock Service]
+    CHECKOUT --> ORDER[Order Service]
     CHECKOUT --> PAYMENT[Payment Service]
     CHECKOUT --> COMMISSION[Commission Service]
     CART --> DB[(PostgreSQL)]
     PRICE --> DB
     STOCK --> DB
-    PAYMENT --> GATEWAY[Payment Provider]
+    ORDER --> DB
     COMMISSION --> DB
+    PAYMENT --> GATEWAY[Payment Provider]
 ```
 
-## Boundary guidelines
+## Dependency injection
 
-- Avoid duplicating another domain's business rules.
-- Keep shared workflows explicit in orchestration services.
-- Pass transaction context deliberately when multiple operations must commit or roll back together.
-- Avoid hidden circular dependencies between domains.
-- Test domain behavior separately from HTTP transport when practical.
+```ts
+import { inject } from '@adonisjs/core'
+import { PricingService } from '#pricing/services/pricing_service'
+import { StockService } from '#product/services/stock_service'
+import { PaymentService } from '#payment/services/payment_service'
 
-[View the domain diagram source](../diagrams/domain-modules.mmd)
+@inject()
+export class CheckoutService {
+  constructor(
+    private readonly pricingService: PricingService,
+    private readonly stockService: StockService,
+    private readonly paymentService: PaymentService,
+  ) {}
+
+  // Coordinate workflow here; keep HTTP details in controllers.
+}
+```
+
+Explicit collaborators make the workflow easier to inspect and test.
+
+[More implementation examples](code-examples.md)

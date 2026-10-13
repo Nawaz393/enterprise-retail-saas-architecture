@@ -1,10 +1,10 @@
 flowchart TD
     ITEMS[Cart items and prices] --> SUB[Calculate subtotal]
-    SUB --> DISCOUNT[Allocate discounts]
-    DISCOUNT --> TAXBASE[Determine taxable amount]
-    TAXBASE --> TAX[Apply relevant tax rules]
-    TAX --> ROUND[Apply currency rounding policy]
-    ROUND --> RECONCILE{Totals reconcile?}
-    RECONCILE -->|No| ADJUST[Apply documented remainder rule]
-    RECONCILE -->|Yes| SAVE[Persist totals and line snapshots]
-    ADJUST --> SAVE
+    SUB --> DISC[Allocate discounts]
+    DISC --> BASE[Determine taxable amount]
+    BASE --> TAX[Apply applicable tax rules]
+    TAX --> ROUND[Apply currency rounding]
+    ROUND --> CHECK{Totals reconcile?}
+    CHECK -->|No| DELTA[Apply documented remainder rule]
+    CHECK -->|Yes| SAVE[Persist totals and snapshots]
+    DELTA --> SAVE

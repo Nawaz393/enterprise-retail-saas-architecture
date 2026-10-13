@@ -1,34 +1,28 @@
-# Asynchronous Processing and File Storage
+# Asynchronous Processing
 
 [← Main README](../README.md) · [← Documentation index](README.md)
 
-## Purpose
-
-Tasks such as email delivery and document generation can run in background workers rather than extending the duration of an API request. Object storage can hold generated files and application assets where configured.
-
-## Conceptual workflow
-
 ```mermaid
 flowchart LR
-    API[API Service] --> ENQUEUE[Enqueue job]
-    ENQUEUE --> QUEUE[(Queue)]
+    API[API Service] --> ENQUEUE[Enqueue task]
+    ENQUEUE --> QUEUE[(Redis / BullMQ)]
     QUEUE --> WORKER[Worker]
-    WORKER --> PROCESS[Generate / process file]
-    PROCESS --> STORE[(Object storage)]
-    WORKER --> EMAIL[Send notification]
-    WORKER --> STATUS[Record outcome]
+    WORKER --> PROCESS[Generate / process document]
+    PROCESS --> STORAGE[(Object storage)]
+    WORKER --> EMAIL[Send email]
+    WORKER --> RESULT[Record result]
 ```
 
-See [`../diagrams/background-processing.mmd`](../diagrams/background-processing.mmd).
+Queue-backed workers can isolate retryable tasks such as email delivery and PDF generation from the HTTP request lifecycle.
 
-## Reliability practices
+## Reliability checklist
 
 - Make jobs idempotent where possible.
-- Set bounded retry policies and backoff for transient failures.
-- Separate permanent errors from retryable errors.
-- Capture job status, attempts, duration, and failure reason without logging secrets.
-- Define how failed jobs are inspected and replayed.
-- Use private storage and short-lived signed URLs or authenticated downloads for sensitive documents.
-- Keep the database record and file lifecycle consistent, including cleanup for orphaned files.
+- Use bounded retries and backoff for transient errors.
+- Separate permanent errors from retryable ones.
+- Record job status and attempts without logging secrets.
+- Provide a way to inspect and replay failed jobs.
+- Use private object storage and controlled download links for private files.
+- Reconcile database records and stored files; clean up orphaned objects.
 
-Only describe the queue provider, object-storage service, and deployment model as active production components if that is verified.
+[Diagram source](../diagrams/background-processing.mmd)

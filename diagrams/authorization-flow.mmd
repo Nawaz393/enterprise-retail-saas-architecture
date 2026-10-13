@@ -1,11 +1,11 @@
 flowchart TD
-    REQUEST[Authenticated Request] --> PERMS[Resolve Permissions]
-    PERMS --> SCOPE{Valid permitted scope?}
-    SCOPE -->|Global| GLOBAL[Apply global permission]
+    REQUEST[Authenticated Request] --> PERM[Resolve action permissions]
+    PERM --> SCOPE{Resolve record scope}
+    SCOPE -->|Global| ALL[Query within explicit grant]
     SCOPE -->|Organization / ISO| ORG[Filter by organization]
     SCOPE -->|Self| SELF[Filter by current user]
     SCOPE -->|Missing / invalid| FAIL[Fail closed]
-    GLOBAL --> QUERY[Execute scoped query]
-    ORG --> QUERY
-    SELF --> QUERY
-    FAIL --> EMPTY[Return no records or deny]
+    ALL --> RESULT[Execute scoped query]
+    ORG --> RESULT
+    SELF --> RESULT
+    FAIL --> EMPTY[Return empty result or deny]

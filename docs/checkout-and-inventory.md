@@ -1,66 +1,45 @@
 # Checkout and Inventory Consistency
 
-[← Main README](../README.md) · [← Documentation index](README.md)
-
-## Goal
-
-Checkout coordinates inventory, pricing, order creation, payment, and any related commission records. The workflow must handle concurrent requests and partial failures deliberately.
-
-## Conceptual sequence
+[← Main README](../README.md) · [← Documentation index](README.md) · [Code examples](code-examples.md)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Customer
+    actor Client
     participant API as Checkout API
     participant DB as PostgreSQL Transaction
     participant Pay as Payment Provider
-
-    Customer->>API: Submit checkout
+    Client->>API: Submit checkout
     API->>DB: Begin transaction
-    API->>DB: Validate and lock stock rows
-    DB-->>API: Locked inventory state
-    API->>API: Calculate totals
+    API->>DB: Lock and validate stock
+    DB-->>API: Current inventory state
+    API->>API: Calculate pricing and tax
     API->>DB: Write order and line items
     API->>Pay: Initiate payment
-    alt Payment succeeds
+    alt Payment accepted
         Pay-->>API: Provider result
-        API->>DB: Record payment state
-        API->>DB: Commit transaction
-        API-->>Customer: Confirmation
-    else Payment fails before commit
-        Pay-->>API: Failure result
+        API->>DB: Persist payment state
+        API->>DB: Commit
+        API-->>Client: Confirmation
+    else Payment rejected
+        Pay-->>API: Decline
         API->>DB: Roll back local changes
-        API-->>Customer: Failure response
+        API-->>Client: Failure response
     end
 ```
 
-Source: [`../diagrams/checkout-sequence.mmd`](../diagrams/checkout-sequence.mmd).
+A row lock can serialize competing attempts to reserve the same inventory row. See the [transactional stock example](code-examples.md#3-transactional-inventory-reservation).
 
-## Inventory locking
+## External payment caveat
 
-Row-level locks, used inside a transaction, can prevent competing checkouts from successfully reserving the same limited stock. The exact lock order, validation strategy, and isolation assumptions should be documented and tested.
+A database rollback cannot undo an external payment-provider side effect. Timeouts can leave the provider outcome unknown, or the provider may approve just before the application fails to persist the result.
 
-## Payment boundary caveat
-
-A PostgreSQL transaction cannot roll back an external payment-provider side effect. A timeout may leave the provider's outcome unknown, and the provider may approve a payment just before the application fails to persist the result.
-
-A robust integration should consider:
-
-- Idempotency keys for repeated checkout attempts.
-- Explicit pending, succeeded, failed, and reconciliation-required states.
-- Webhook verification and replay protection.
-- Retry policies that do not duplicate charges.
-- Reconciliation for provider-approved payments missing from local records.
-- Inventory release or compensation policies for abandoned/failed workflows.
-
-Do not describe this as a distributed ACID transaction unless a genuine distributed transaction mechanism exists.
+A robust workflow should consider idempotency keys, explicit payment states, verified webhooks, retry safety, reconciliation, and inventory release/compensation rules.
 
 ## Test scenarios
 
-- Two customers attempt to purchase the final unit concurrently.
-- The same checkout request is submitted twice.
-- Payment is declined.
-- The provider times out with an unknown outcome.
-- Payment succeeds but the application crashes before committing locally.
-- A worker or webhook retries an already-processed event.
+- Two checkouts compete for the final stock unit.
+- The same request is submitted twice.
+- Payment is declined or times out.
+- Payment succeeds but the local transaction fails to commit.
+- A webhook or worker retries an already-processed event.
