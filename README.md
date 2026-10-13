@@ -71,7 +71,7 @@ flowchart TB
 
 ## Contact
 
-**M Nawaz Khan — Full Stack Developer**
+**M Nawaz Khan Full Stack Developer**
 
 - GitHub: [Nawaz393](https://github.com/Nawaz393)
 - LinkedIn: [Muhammad Nawaz Khan](https://www.linkedin.com/in/nawaz393)
