@@ -19,13 +19,13 @@ flowchart TD
 
 A proportional allocation can use each component's share of the bundle's list price:
 
-\[
-w_i = \frac{p_i}{\sum_j p_j}
-\]
+$$
+w_i = \frac{p_i}{\sum_{j} p_j}
+$$
 
-\[
+$$
 d_i = D \times w_i
-\]
+$$
 
 Here, \(p_i\) is the component's list-price contribution and \(D\) is the total discount. The implementation must define rounding and how a remaining minor-unit difference is assigned.
 
